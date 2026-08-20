@@ -36,6 +36,31 @@ it.each([
   })
 })
 
+it('lets the quick-add event choose a different date and time', async () => {
+  const { onSubmit, user } = renderEventSheet(new Date('2026-08-13T12:00:00.000Z'))
+
+  const date = screen.getByLabelText('Date')
+  const time = screen.getByLabelText('Heure')
+  expect(date).toHaveAttribute('type', 'date')
+  expect(time).toHaveAttribute('type', 'time')
+  expect(date).toHaveValue('2026-08-13')
+  expect(time).toHaveValue('12:30')
+
+  await user.type(screen.getByLabelText('Titre'), 'Dentiste')
+  await user.clear(date)
+  await user.type(date, '2026-08-14')
+  await user.clear(time)
+  await user.type(time, '18:45')
+  await user.click(screen.getByRole('button', { name: /^ajouter$/i }))
+
+  expect(onSubmit).toHaveBeenCalledWith({
+    kind: 'event',
+    owner: 'family',
+    startsAt: '2026-08-14T16:45:00.000Z',
+    title: 'Dentiste',
+  })
+})
+
 it('uses the visible Ajouter text in the submit accessible name', () => {
   renderEventSheet(new Date('2026-08-13T12:00:00.000Z'))
 
