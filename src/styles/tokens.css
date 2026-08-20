@@ -1,0 +1,64 @@
+:root {
+  --color-bg: #fcf8f5;
+  --color-surface: #fffcf9;
+  --color-ink: #081946;
+  --color-muted: #66728c;
+  --color-family: #66728c;
+  --color-primary: #526e59;
+  --color-primary-strong: #465f4d;
+  --color-school: #a54934;
+  --color-child: #315aa6;
+  --color-border: #eae3dd;
+  --color-disabled: #ece9e6;
+  --color-disabled-ink: #919ca4;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-control: 10px;
+  --radius-round: 999px;
+  --shadow-sheet: -8px 0 24px rgb(8 25 70 / 8%);
+  --tap-size: 44px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-14: 56px;
+  --space-18: 72px;
+  --font-sans: Manrope, "Avenir Next", Avenir, system-ui, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-size-wordmark: 26px;
+  --line-height-wordmark: 32px;
+  --font-size-greeting: 30px;
+  --line-height-greeting: 36px;
+  --font-size-date: 16px;
+  --line-height-date: 24px;
+  --font-size-timeline: 16px;
+  --line-height-timeline: 24px;
+  --font-size-meta: 12px;
+  --line-height-meta: 18px;
+  --font-size-control: 13px;
+  --line-height-control: 18px;
+}
+
+@media (min-width: 760px) {
+  :root {
+    --font-size-wordmark: 30px;
+    --line-height-wordmark: 36px;
+    --font-size-greeting: 42px;
+    --line-height-greeting: 50px;
+    --font-size-date: 20px;
+    --line-height-date: 28px;
+    --font-size-timeline: 20px;
+    --line-height-timeline: 28px;
+    --font-size-meta: 16px;
+    --line-height-meta: 22px;
+    --font-size-control: 16px;
+    --line-height-control: 22px;
+  }
+}
