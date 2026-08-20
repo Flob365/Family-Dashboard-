@@ -49,7 +49,7 @@ function parisOffsetAt(instant: Date) {
   return direction * (Number(match[2]) * 60 + Number(match[3])) * 60_000
 }
 
-function localIsoForDay(now: Date, time: string) {
+function parisDateValue(now: Date) {
   const parts = new Intl.DateTimeFormat('en-CA', {
     day: '2-digit',
     month: '2-digit',
@@ -57,11 +57,15 @@ function localIsoForDay(now: Date, time: string) {
     year: 'numeric',
   }).formatToParts(now)
   const value = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return `${value.year}-${value.month}-${value.day}`
+}
+
+function localIsoForDate(date: string, time: string) {
   const [hour, minute] = time.split(':').map(Number)
   const wallClockUtc = Date.UTC(
-    Number(value.year),
-    Number(value.month) - 1,
-    Number(value.day),
+    Number(date.slice(0, 4)),
+    Number(date.slice(5, 7)) - 1,
+    Number(date.slice(8, 10)),
     hour,
     minute,
   )
@@ -71,13 +75,8 @@ function localIsoForDay(now: Date, time: string) {
   return new Date(wallClockUtc - resolvedOffset).toISOString()
 }
 
-function displayDate(now: Date) {
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    timeZone: PARIS_TIME_ZONE,
-    year: 'numeric',
-  }).format(now)
+function localIsoForDay(now: Date, time: string) {
+  return localIsoForDate(parisDateValue(now), time)
 }
 
 export function AddSheet({
@@ -90,6 +89,7 @@ export function AddSheet({
   presetTitle = '',
 }: AddSheetProps) {
   const [title, setTitle] = useState(presetTitle)
+  const [date, setDate] = useState(() => parisDateValue(now))
   const [time, setTime] = useState('12:30')
   const [owner, setOwner] = useState<Owner>('family')
   const [invalid, setInvalid] = useState(false)
@@ -148,10 +148,11 @@ export function AddSheet({
       titleRef.current?.focus()
       return
     }
+    if (kind === 'event' && (date === '' || time === '')) return
 
     const payload: QuickAddPayload =
       kind === 'event'
-        ? { kind, title: cleanTitle, startsAt: localIsoForDay(now, time), owner }
+        ? { kind, title: cleanTitle, startsAt: localIsoForDate(date, time), owner }
         : kind === 'task'
           ? { kind, title: cleanTitle, dueAt: localIsoForDay(now, '18:00'), owner }
           : { kind, name: cleanTitle, aisle: 'other', quantity: null }
@@ -223,12 +224,25 @@ export function AddSheet({
               <>
                 <label className="form-field form-field--icon">
                   <span>Date</span>
-                  <input readOnly value={displayDate(now)} />
+                  <input
+                    aria-label="Date"
+                    onChange={(event) => setDate(event.target.value)}
+                    required
+                    type="date"
+                    value={date}
+                  />
                   <CalendarDays aria-hidden="true" />
                 </label>
                 <label className="form-field form-field--icon">
                   <span>Heure</span>
-                  <input onChange={(event) => setTime(event.target.value)} value={time} />
+                  <input
+                    aria-label="Heure"
+                    onChange={(event) => setTime(event.target.value)}
+                    required
+                    step="60"
+                    type="time"
+                    value={time}
+                  />
                   <Clock3 aria-hidden="true" />
                 </label>
                 <label className="form-field form-field--select">
