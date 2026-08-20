@@ -227,6 +227,7 @@ export function AddSheet({
                   <input
                     aria-label="Date"
                     onChange={(event) => setDate(event.target.value)}
+                    onInput={(event) => setDate(event.currentTarget.value)}
                     required
                     type="date"
                     value={date}
@@ -238,6 +239,7 @@ export function AddSheet({
                   <input
                     aria-label="Heure"
                     onChange={(event) => setTime(event.target.value)}
+                    onInput={(event) => setTime(event.currentTarget.value)}
                     required
                     step="60"
                     type="time"
