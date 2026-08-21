@@ -6,6 +6,7 @@ import { createMemoryRouter, RouterProvider, useLocation } from 'react-router-do
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createAppRouter } from '../../app/router'
 import type { AppConfig } from '../../lib/config'
+import { createDemoRepository } from '../../repositories/demoRepository'
 import { AuthProvider, useAuth } from './AuthProvider'
 import { OnboardingPage } from './OnboardingPage'
 
@@ -194,6 +195,72 @@ describe('AuthProvider', () => {
     await waitFor(() => {
       expect(screen.getByLabelText('household')).toHaveTextContent('household-a')
       expect(screen.getByLabelText('household-owner')).toHaveTextContent('florian')
+    })
+  })
+
+  it('lets an existing household owner create a partner invitation from household settings', async () => {
+    const boundary = createAuthClient(session)
+    const router = createAppRouter(createDemoRepository(), '/parametres/foyer')
+    const user = userEvent.setup()
+    render(
+      <Harness client={boundary.client}>
+        <RouterProvider router={router} />
+      </Harness>,
+    )
+
+    expect(await screen.findByRole('heading', { name: 'Paramètres du foyer' })).toBeVisible()
+    expect(screen.getAllByRole('link', { name: 'Paramètres du foyer' }).length).toBeGreaterThan(0)
+
+    await user.type(screen.getByLabelText('Adresse e-mail de votre partenaire'), 'partner@example.com')
+    await user.click(screen.getByRole('button', { name: 'Créer le lien d’invitation' }))
+
+    expect(await screen.findByLabelText('Lien d’invitation')).toHaveValue(
+      'http://localhost:3000/bienvenue?invitation=22222222-2222-4222-8222-222222222222',
+    )
+    expect(boundary.rpcCalls).toContainEqual({
+      name: 'issue_household_invitation',
+      args: {
+        target_household_id: 'household-a',
+        invited_email: 'partner@example.com',
+        invited_owner: 'partner',
+      },
+    })
+  })
+
+  it('delivers a generated invitation through copy and native sharing actions', async () => {
+    const boundary = createAuthClient(session)
+    const router = createAppRouter(createDemoRepository(), '/parametres/foyer')
+    const user = userEvent.setup()
+    const writeText = vi.fn(async () => undefined)
+    const share = vi.fn(async () => undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    Object.defineProperty(navigator, 'share', { configurable: true, value: share })
+    render(
+      <Harness client={boundary.client}>
+        <RouterProvider router={router} />
+      </Harness>,
+    )
+
+    await user.type(
+      await screen.findByLabelText('Adresse e-mail de votre partenaire'),
+      'partner@example.com',
+    )
+    await user.click(screen.getByRole('button', { name: 'Créer le lien d’invitation' }))
+    await screen.findByLabelText('Lien d’invitation')
+
+    await user.click(screen.getByRole('button', { name: 'Copier le lien' }))
+    await user.click(screen.getByRole('button', { name: 'Partager le lien' }))
+
+    const invitationUrl =
+      'http://localhost:3000/bienvenue?invitation=22222222-2222-4222-8222-222222222222'
+    expect(writeText).toHaveBeenCalledWith(invitationUrl)
+    expect(share).toHaveBeenCalledWith({
+      title: 'Invitation Maison',
+      text: 'Rejoins notre foyer dans Maison.',
+      url: invitationUrl,
     })
   })
 
