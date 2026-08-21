@@ -63,6 +63,7 @@ function createAuthClient(
       signUp: vi.fn(async () => ({ data: { session: null, user: session.user }, error: null })),
       signOut: vi.fn(async () => ({ error: null })),
       resetPasswordForEmail: vi.fn(async () => ({ data: {}, error: null })),
+      updateUser: vi.fn(async () => ({ data: { user: session.user }, error: null })),
     },
     from: vi.fn(() => ({
       select: vi.fn(() => ({
@@ -88,8 +89,8 @@ function createAuthClient(
 
   return {
     client,
-    emitAuthChange(nextSession: Session | null) {
-      authChange?.('SIGNED_IN', nextSession)
+    emitAuthChange(nextSession: Session | null, event = 'SIGNED_IN') {
+      authChange?.(event, nextSession)
     },
     rpcCalls,
     unsubscribe,
@@ -172,7 +173,7 @@ describe('AuthProvider', () => {
       options: { emailRedirectTo: window.location.origin },
     })
     expect(boundary.client.auth.resetPasswordForEmail).toHaveBeenCalledWith('parent@example.com', {
-      redirectTo: window.location.origin,
+      redirectTo: `${window.location.origin}/connexion`,
     })
     expect(boundary.client.auth.signOut).toHaveBeenCalledOnce()
 
@@ -196,6 +197,27 @@ describe('AuthProvider', () => {
       expect(screen.getByLabelText('household')).toHaveTextContent('household-a')
       expect(screen.getByLabelText('household-owner')).toHaveTextContent('florian')
     })
+  })
+
+  it('lets a user choose a new password after opening a recovery email', async () => {
+    const boundary = createAuthClient(null, [{ data: [], error: null }])
+    const router = createAppRouter(undefined, '/connexion')
+    const user = userEvent.setup()
+    render(
+      <Harness client={boundary.client}>
+        <RouterProvider router={router} />
+      </Harness>,
+    )
+
+    expect(await screen.findByRole('heading', { name: 'Connexion' })).toBeVisible()
+    await act(async () => boundary.emitAuthChange(session, 'PASSWORD_RECOVERY'))
+
+    expect(await screen.findByRole('heading', { name: 'Choisir un nouveau mot de passe' })).toBeVisible()
+    await user.type(screen.getByLabelText('Nouveau mot de passe'), 'nouveau-secret')
+    await user.click(screen.getByRole('button', { name: 'Enregistrer le mot de passe' }))
+
+    expect(boundary.client.auth.updateUser).toHaveBeenCalledWith({ password: 'nouveau-secret' })
+    expect(await screen.findByRole('heading', { name: /Bienvenue dans votre espace familial/ })).toBeVisible()
   })
 
   it('lets an existing household owner create a partner invitation from household settings', async () => {
