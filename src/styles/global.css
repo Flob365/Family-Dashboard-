@@ -96,8 +96,29 @@ svg {
   display: flex;
   height: 72px;
   gap: 10px;
-  align-items: flex-start;
-  padding: 24px 20px 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px 0;
+}
+
+.mobile-settings-link {
+  display: inline-flex;
+  width: var(--tap-size);
+  height: var(--tap-size);
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-round);
+  color: var(--color-ink);
+}
+
+.mobile-settings-link.active {
+  background: rgb(82 110 89 / 8%);
+  color: var(--color-primary);
+}
+
+.mobile-settings-link svg {
+  width: 24px;
+  height: 24px;
 }
 
 .brand-lockup {
@@ -949,6 +970,85 @@ svg {
   line-height: var(--line-height-control);
 }
 
+.settings-card {
+  display: grid;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  gap: var(--space-4);
+}
+
+.settings-card__icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-round);
+  background: rgb(82 110 89 / 10%);
+  color: var(--color-primary);
+  place-items: center;
+}
+
+.settings-card__content,
+.settings-form,
+.invitation-result {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.settings-card h2,
+.settings-card p,
+.invitation-result {
+  margin: 0;
+}
+
+.settings-card__content > p,
+.settings-help {
+  color: var(--color-muted);
+}
+
+.settings-form {
+  margin-top: var(--space-2);
+}
+
+.settings-form .primary-action {
+  width: 100%;
+}
+
+.settings-help {
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.settings-notice,
+.invitation-result {
+  padding: var(--space-4);
+  border-radius: var(--radius-control);
+  background: rgb(82 110 89 / 8%);
+}
+
+.invitation-result {
+  margin-top: var(--space-2);
+}
+
+.invitation-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.invitation-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.invitation-actions svg {
+  width: 18px;
+  height: 18px;
+}
+
 .primary-action,
 .text-button,
 .danger-button {
@@ -1392,6 +1492,10 @@ svg {
     margin-top: 33px;
   }
 
+  .app-nav--settings {
+    margin-top: auto;
+  }
+
   .app-nav--desktop .app-nav__link {
     min-height: 68px;
     gap: 18px;
@@ -1426,7 +1530,20 @@ svg {
 
   .voice-control--desktop {
     display: block;
-    margin: auto 0 64px 52px;
+    margin: 24px 0 64px 52px;
+  }
+
+  .settings-card {
+    grid-template-columns: 56px minmax(0, 1fr);
+    padding: var(--space-8);
+  }
+
+  .settings-card__content {
+    max-width: 620px;
+  }
+
+  .invitation-actions {
+    grid-template-columns: 1fr 1fr;
   }
 
   .voice-control--desktop button {

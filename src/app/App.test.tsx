@@ -74,3 +74,11 @@ it('surfaces lost connectivity without replacing the active application', async 
   expect(screen.getByRole('status')).toHaveTextContent(/hors ligne/i)
   expect(screen.getByRole('heading', { name: /bonjour/i })).toBeVisible()
 })
+
+it('keeps household invitations unavailable in the local demo profile', () => {
+  render(<App config={{ mode: 'demo' }} route="/parametres/foyer" />)
+
+  expect(screen.getByRole('heading', { name: 'Paramètres du foyer' })).toBeVisible()
+  expect(screen.getByRole('status')).toHaveTextContent(/compte réel/i)
+  expect(screen.queryByLabelText('Adresse e-mail de votre partenaire')).not.toBeInTheDocument()
+})

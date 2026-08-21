@@ -3,6 +3,7 @@ import {
   CalendarRange,
   House,
   Mic,
+  Settings,
   ShoppingCart,
   Users,
 } from 'lucide-react'
@@ -16,6 +17,8 @@ const destinations = [
   { to: '/maison', label: 'Maison', icon: House },
   { to: '/enfants', label: 'Enfants', icon: Users },
 ]
+
+const settingsDestination = { to: '/parametres/foyer', label: 'Paramètres du foyer', icon: Settings }
 
 function Navigation({ className }: { className: string }) {
   return (
@@ -50,8 +53,13 @@ export function AppShell() {
   return (
     <div className="app-shell">
       <header className="mobile-header">
-        <span className="wordmark">Maison</span>
-        {mode === 'demo' ? <span className="demo-badge">Démo</span> : null}
+        <div className="brand-lockup">
+          <span className="wordmark">Maison</span>
+          {mode === 'demo' ? <span className="demo-badge">Démo</span> : null}
+        </div>
+        <NavLink aria-label="Paramètres du foyer" className="mobile-settings-link" to={settingsDestination.to}>
+          <Settings aria-hidden="true" />
+        </NavLink>
       </header>
 
       <aside className="desktop-sidebar">
@@ -60,6 +68,12 @@ export function AppShell() {
           {mode === 'demo' ? <span className="demo-badge">Démo</span> : null}
         </div>
         <Navigation className="app-nav app-nav--desktop" />
+        <nav aria-label="Paramètres" className="app-nav app-nav--desktop app-nav--settings">
+          <NavLink className="app-nav__link" to={settingsDestination.to}>
+            <Settings aria-hidden="true" />
+            <span>{settingsDestination.label}</span>
+          </NavLink>
+        </nav>
         <VoiceControl className="voice-control--desktop" />
       </aside>
 
