@@ -12,8 +12,50 @@ export function SignInPage() {
   const [submitting, setSubmitting] = useState(false)
 
   if (auth.mode === 'demo') return <Navigate replace to="/" />
-  if (auth.mode === 'connected' && auth.user !== null) {
+  if (auth.mode === 'connected' && auth.user !== null && !auth.isPasswordRecovery) {
     return <Navigate replace to={auth.householdId === null ? '/bienvenue' : '/'} />
+  }
+
+  async function updatePassword(event: FormEvent) {
+    event.preventDefault()
+    setSubmitting(true)
+    setError(null)
+    try {
+      await auth.updatePassword(password)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Le mot de passe n’a pas pu être modifié.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (auth.isPasswordRecovery) {
+    return (
+      <main className="auth-page">
+        <section className="auth-card" aria-labelledby="password-recovery-title">
+          <span className="wordmark">Maison</span>
+          <h1 id="password-recovery-title">Choisir un nouveau mot de passe</h1>
+          <p>Utilisez au moins 8 caractères.</p>
+          <form className="auth-form" onSubmit={(event) => void updatePassword(event)}>
+            <label>
+              Nouveau mot de passe
+              <input
+                autoComplete="new-password"
+                minLength={8}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                type="password"
+                value={password}
+              />
+            </label>
+            {error !== null ? <p className="auth-message auth-message--error" role="alert">{error}</p> : null}
+            <button className="auth-primary" disabled={submitting} type="submit">
+              Enregistrer le mot de passe
+            </button>
+          </form>
+        </section>
+      </main>
+    )
   }
 
   async function submit(event: FormEvent) {
