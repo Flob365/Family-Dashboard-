@@ -7,6 +7,7 @@ import { CalendarPage } from '../features/calendar/CalendarPage'
 import { ChildrenPage } from '../features/children/ChildrenPage'
 import { HouseholdPage } from '../features/household/HouseholdPage'
 import { ShoppingPage } from '../features/shopping/ShoppingPage'
+import { HouseholdSettingsPage } from '../features/settings/HouseholdSettingsPage'
 import type { FamilyRepository } from '../repositories/contracts'
 import { AppShell } from './AppShell'
 
@@ -132,6 +133,7 @@ function routes(repository?: FamilyRepository): RouteObject[] {
           path: 'maison',
           element: <RepositoryPage repository={repository} render={(active) => <HouseholdPage repository={active} />} />,
         },
+        { path: 'parametres/foyer', element: <HouseholdSettingsPage /> },
         { path: 'enfants', element: <Navigate replace to="/enfants/ecole" /> },
         {
           path: 'enfants/ecole',
