@@ -33,11 +33,13 @@ interface AuthContextValue {
   householdOwner: HouseholdMember['owner'] | null
   householdError: string | null
   isLoading: boolean
+  isPasswordRecovery: boolean
   repository: FamilyRepository | null
   signIn(email: string, password: string): Promise<void>
   signUp(email: string, password: string): Promise<{ confirmationRequired: boolean }>
   signOut(): Promise<void>
   requestPasswordReset(email: string): Promise<void>
+  updatePassword(password: string): Promise<void>
   createHousehold(
     householdName: string,
     displayName: string,
@@ -76,6 +78,7 @@ export function AuthProvider({
   const [householdOwner, setHouseholdOwner] = useState<HouseholdMember['owner'] | null>(null)
   const [householdError, setHouseholdError] = useState<string | null>(null)
   const [householdResolutionAttempt, setHouseholdResolutionAttempt] = useState(0)
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
   const [isLoading, setIsLoading] = useState(config.mode === 'connected')
   const [demoRepository] = useState(
     () => suppliedDemoRepository ?? createDemoRepository(),
@@ -123,8 +126,9 @@ export function AuthProvider({
     })
     const {
       data: { subscription },
-    } = client.auth.onAuthStateChange((_event, nextSession) => {
+    } = client.auth.onAuthStateChange((event, nextSession) => {
       if (!active) return
+      if (event === 'PASSWORD_RECOVERY') setIsPasswordRecovery(true)
       setSession(nextSession)
       if (nextSession === null) {
         setHouseholdId(null)
@@ -197,6 +201,7 @@ export function AuthProvider({
       householdOwner,
       householdError,
       isLoading,
+      isPasswordRecovery,
       repository: mode === 'demo' ? demoRepository : connectedRepository,
       async signIn(email, password) {
         const { error } = await requireClient().auth.signInWithPassword({ email, password })
@@ -217,13 +222,19 @@ export function AuthProvider({
         setSession(null)
         setHouseholdId(null)
         setHouseholdOwner(null)
+        setIsPasswordRecovery(false)
         clearPendingInvitation()
       },
       async requestPasswordReset(email) {
         const { error } = await requireClient().auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}/connexion`,
         })
         errorMessage(error)
+      },
+      async updatePassword(password) {
+        const { error } = await requireClient().auth.updateUser({ password })
+        errorMessage(error)
+        setIsPasswordRecovery(false)
       },
       async createHousehold(householdName, displayName, owner) {
         const { data, error } = await requireClient().rpc('create_household', {
@@ -266,6 +277,7 @@ export function AuthProvider({
         setSession(null)
         setHouseholdId(null)
         setHouseholdOwner(null)
+        setIsPasswordRecovery(false)
         clearPendingInvitation()
         setMode('demo')
       },
@@ -279,6 +291,7 @@ export function AuthProvider({
       householdError,
       householdRepository,
       isLoading,
+      isPasswordRecovery,
       mode,
       requireClient,
       resolveHousehold,
